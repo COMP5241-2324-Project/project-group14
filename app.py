@@ -11,7 +11,7 @@ def home():
 @app.route('/webhook', methods=['POST'])
 def handle_github_webhook():
     # 验证Webhook安全性的密钥，假设你在GitHub Webhook设置中定义了一个秘密
-    secret_token = b'your_secret_token'
+    secret_token = b'"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"'
     signature = 'sha1=' + hmac.new(secret_token, request.data, hashlib.sha1).hexdigest()
     
     # 确认请求的签名是否匹配
