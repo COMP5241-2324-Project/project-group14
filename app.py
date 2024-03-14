@@ -12,9 +12,9 @@ def home():
     return render_template('index.html') 
 
 
-@app.route('/test')
-def test():
-    url = f"https://api.github.com/orgs/apache/projects"
+@app.route('/projects-list/<string:org')
+def test(org):
+    url = f"https://api.github.com/orgs/{org}/projects"
     response = requests.get(url, headers=headers)
     print(response.json())
     data = response.json()
