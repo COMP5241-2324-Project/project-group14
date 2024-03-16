@@ -5,19 +5,43 @@ app = Flask(__name__)
 token = "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"
 headers = {'Authorization': f'token {token}'}
 
+
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/issues')
-def issues():
-    url = "https://api.github.com/repos/{owner}/{repo}/issues"
-    response = requests.get(url.format(owner="COMP5241-2324-Project", repo="project-group14"), headers = headers)
-    issues = response.json()
-    for issue in issues:
-        print(f"Issue: {issue['title']}")
-    return jsonify(response.json())
 
+
+@app.route('/comments/<issueID>')
+def comments(issueID):
+    url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issueID)
+    response = requests.get(url, headers = headers)
+    comments = response.json()
+    for comment in comments:
+        print('\n\nComment from user %s:\n %s\n\n' % (comment['user']['login'], comment['body']))
+
+    return jsonify(comments)
+
+
+@app.route('/assignedIssues')
+def assignedIssues():
+    url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
+    issue_response = requests.get(url, headers = headers)
+    issues = issue_response.json()
+    assigned_issue = []
+    for issue in issues:
+         if issue['labels'] != []:
+            assigned_issue.append(issue)
+    for issue in assigned_issue:
+        print('Issue: %s' % issue['title'])
+        cnt = 0
+        for label in issue['labels']:
+            cnt += 1
+            print('Label %d: %s ' % (cnt, label['name']))
+        print('')
+
+    return assigned_issue
+<<<<<<< HEAD
 @app.route('/code_changes')
 def code_changes():
     # 初始化一个列表来存储所有的提交
@@ -69,6 +93,53 @@ def code_changes_stats():
 
     return jsonify(user_stats)
 
+def CountIssueAndComment(owner, repo, users):
+    new_users = users
+
+    issue_url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
+    issue_response = requests.get(issue_url, headers = headers)
+    issues = issue_response.json()
+
+    for issue in issues:
+        issue_id = issue['number']
+        issue_user_name = issue['user']['login']
+        for user in new_users:
+            if user['name'] == issue_user_name:
+                user['issue_num'] += 1
+        
+        print(issue_id)
+        comment_url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issue_id)
+        comment_response = requests.get(comment_url, headers = headers)
+        comments = comment_response.json()
+        for comment in comments:
+            comment_user_name = comment['user']['login']
+            for user in new_users:
+                if user['name'] == comment_user_name:
+                    user['comment_num'] += 1
+
+    return new_users
+
+
+def Getusers(owner, repo):
+    url = 'https://api.github.com/repos/%s/%s/contributors' % (owner, repo)
+    response = requests.get(url, headers = headers)
+    all_users = response.json()
+
+    users = []
+    for user in all_users:
+        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_ratio': 0}
+        users.append(new_user)
+    return users
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
+    #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
+    #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
+    #users = [user1, user2, user3]
+    owner = 'microsoft'
+    repo = 'vscode'
+    users = Getusers(owner, repo)
+    print(users)
+    users = CountIssueAndComment(owner, repo, users)
+    print(users)
