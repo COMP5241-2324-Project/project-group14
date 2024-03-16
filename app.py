@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify
-import requests
+import requests, datetime
 
 app = Flask(__name__)
 token = "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"
@@ -64,8 +64,7 @@ def code_changes():
 
     return jsonify(all_commits)
 
-def code_changes_stats(owner, repo, users):
-    # 初始化一个字典来存储每个用户的提交次数和代码修改总数
+def code_changes_stats(owner, repo, users, deadline):
     new_users = users
     page = 1
     while True:
@@ -74,9 +73,9 @@ def code_changes_stats(owner, repo, users):
         commits = response_commits.json()
         if not commits:
             break
-
+            
         for commit in commits:
-            author = commit['commit']['author']['name']
+            author = commit['author']['login']
             for user in new_users:
                 if user['name'] == author:
                     user['commit_num'] += 1
@@ -86,6 +85,13 @@ def code_changes_stats(owner, repo, users):
                     commit_data = response_commit.json()
                     if 'stats' in commit_data:
                         user['code_change'] += commit_data['stats']['total']
+                        
+                        commit_time = commit_data['commit']['author']['date']
+                        date = datetime.datetime.strptime(commit_time, '%Y-%m-%dT%H:%M:%SZ')
+                        deadline_time = datetime.datetime.strptime(deadline, "%Y-%m-%d %H:%M:%S")
+                        three_day_ago = deadline_time - datetime.timedelta(days=3)
+                        if date > three_day_ago and date < deadline_time:
+                            user['deadline_change'] += commit_data['stats']['total']
 
         page += 1
 
@@ -125,8 +131,27 @@ def Getusers(owner, repo):
 
     users = []
     for user in all_users:
-        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_ratio': 0}
+        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_change': 0, 'deadline_fighter': False, 'free_rider': False}
         users.append(new_user)
+    return users
+
+def Free_rider_judge(users, free_ratio):
+    total_code_change = 0
+    for i in users:
+        total_code_change += i['code_change']
+    
+    Average_code_change = total_code_change / len(users)
+
+    for user in users:
+        if user['code_change']  < Average_code_change * free_ratio:
+            user['free_rider'] = True
+
+    return users
+            
+def Deadline_fighter_judge(users, ddl_ratio):
+    for user in users:
+        if user['deadline_change'] > user['code_change'] * ddl_ratio:
+            user['deadline_fighter'] = True
     return users
 
 
@@ -137,9 +162,14 @@ if __name__ == '__main__':
     #users = [user1, user2, user3]
     owner = 'gregorojstersek'
     repo = 'resources-to-become-a-great-engineering-leader'
+    deadline = '2024-01-19 00:00:00'
+    free_ratio = 0.3
+    ddl_ratio = 0.8
     users = Getusers(owner, repo)
-    print(users)
+    #print(users)
     users = CountIssueAndComment(owner, repo, users)
-    print(users)
-    users = code_changes_stats(owner, repo, users)
+    #print(users)
+    users = code_changes_stats(owner, repo, users, deadline)
+    users = Free_rider_judge(users, free_ratio)
+    users = Deadline_fighter_judge(users, ddl_ratio)
     print(users)
