@@ -72,11 +72,26 @@ def CountIssueAndComment(owner, repo, users):
     return new_users
 
 
+def Getusers(owner, repo):
+    url = 'https://api.github.com/repos/%s/%s/contributors' % (owner, repo)
+    response = requests.get(url, headers = headers)
+    all_users = response.json()
+
+    users = []
+    for user in all_users:
+        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_ratio': 0}
+        users.append(new_user)
+    return users
+
+
 if __name__ == '__main__':
-    user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
-    user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
-    user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
-    users = [user1, user2, user3]
+    #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
+    #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
+    #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
+    #users = [user1, user2, user3]
     owner = 'microsoft'
     repo = 'vscode'
-    print(CountIssueAndComment(owner, repo, users))
+    users = Getusers(owner, repo)
+    print(users)
+    users = CountIssueAndComment(owner, repo, users)
+    print(users)
