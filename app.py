@@ -20,21 +20,25 @@ def issues():
 
 @app.route('/code_changes')
 def code_changes():
-    url_commits = "https://api.github.com/repos/{owner}/{repo}/commits"
-    response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="project-group14"), headers = headers)
-    commits = response_commits.json()
-    if not commits:
-        return jsonify({"error": "No commits found"}), 404
-    
-    for commit in commits:
-        print(f"Commit: {commit['commit']['message']}, Author: {commit['commit']['author']['name']}")
-    
+    # 初始化一个列表来存储所有的提交
+    all_commits = []
+    page = 1
+    while True:
+        url_commits = "https://api.github.com/repos/{owner}/{repo}/commits?page={page}&per_page=100"
+        response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="project-group14", page=page), headers = headers)
+        commits = response_commits.json()
+        if not commits:
+            break
 
-    last_commit_sha = commits[0]['sha']
+        for commit in commits:
+            url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
+            response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="project-group14", sha=commit['sha'], headers = headers))
+            commit_data = response_commit.json()
+            all_commits.append(commit_data)
 
-    url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-    response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="project-group14", sha=last_commit_sha, headers = headers))
-    return jsonify(response_commit.json())
+        page += 1
+
+    return jsonify(all_commits)
 
 @app.route('/code_changes_stats')
 def code_changes_stats():
