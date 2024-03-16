@@ -6,12 +6,6 @@ token = "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"
 headers = {'Authorization': f'token {token}'}
 
 
-token = "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"
-headers = {'Authorization': f'token {token}'}
-owner = 'microsoft'
-repo = 'vscode'
-
-
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -32,8 +26,8 @@ def comments(issueID):
 @app.route('/assignedIssues')
 def assignedIssues():
     url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
-    response = requests.get(url, headers = headers)
-    issues = response.json()
+    issue_response = requests.get(url, headers = headers)
+    issues = issue_response.json()
     assigned_issue = []
     for issue in issues:
          if issue['labels'] != []:
@@ -49,33 +43,40 @@ def assignedIssues():
 
     return assigned_issue
 
-@app.route('/issues')
-def issues():
-    url = "https://api.github.com/repos/{owner}/{repo}/issues"
-    response = requests.get(url.format(owner="COMP5241-2324-Project", repo="project-group14"), headers = headers)
-    issues = response.json()
+
+
+def CountIssueAndComment(owner, repo, users):
+    new_users = users
+
+    issue_url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
+    issue_response = requests.get(issue_url, headers = headers)
+    issues = issue_response.json()
+
     for issue in issues:
-        print(f"Issue: {issue['title']}")
-    return jsonify(response.json())
+        issue_id = issue['number']
+        issue_user_name = issue['user']['login']
+        for user in new_users:
+            if user['name'] == issue_user_name:
+                user['issue_num'] += 1
+        
+        print(issue_id)
+        comment_url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issue_id)
+        comment_response = requests.get(comment_url, headers = headers)
+        comments = comment_response.json()
+        for comment in comments:
+            comment_user_name = comment['user']['login']
+            for user in new_users:
+                if user['name'] == comment_user_name:
+                    user['comment_num'] += 1
 
-@app.route('/code_changes')
-def code_changes():
-    url_commits = "https://api.github.com/repos/{owner}/{repo}/commits"
-    response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="project-group14"), headers = headers)
-    commits = response_commits.json()
-    if not commits:
-        return jsonify({"error": "No commits found"}), 404
-    
-    for commit in commits:
-        print(f"Commit: {commit['commit']['message']}, Author: {commit['commit']['author']['name']}")
-    
-
-    last_commit_sha = commits[0]['sha']
-
-    url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-    response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="project-group14", sha=last_commit_sha, headers = headers))
-    return jsonify(response_commit.json())
+    return new_users
 
 
 if __name__ == '__main__':
-    app.run()
+    user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
+    user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
+    user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
+    users = [user1, user2, user3]
+    owner = 'microsoft'
+    repo = 'vscode'
+    print(CountIssueAndComment(owner, repo, users))
