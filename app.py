@@ -41,7 +41,7 @@ def assignedIssues():
         print('')
 
     return assigned_issue
-<<<<<<< HEAD
+
 @app.route('/code_changes')
 def code_changes():
     # 初始化一个列表来存储所有的提交
@@ -64,34 +64,32 @@ def code_changes():
 
     return jsonify(all_commits)
 
-@app.route('/code_changes_stats')
-def code_changes_stats():
+def code_changes_stats(owner, repo, users):
     # 初始化一个字典来存储每个用户的提交次数和代码修改总数
-    user_stats = {}
+    new_users = users
     page = 1
     while True:
         url_commits = "https://api.github.com/repos/{owner}/{repo}/commits?page={page}&per_page=100"
-        response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="Simpsyber", page=page), headers = headers)
+        response_commits = requests.get(url_commits.format(owner=owner, repo=repo, page=page), headers = headers)
         commits = response_commits.json()
         if not commits:
             break
 
         for commit in commits:
             author = commit['commit']['author']['name']
-            if author not in user_stats:
-                user_stats[author] = {'commit_count': 0, 'total_changes': 0}
+            for user in new_users:
+                if user['name'] == author:
+                    user['commit_num'] += 1
 
-            user_stats[author]['commit_count'] += 1
-
-            url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-            response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="Simpsyber", sha=commit['sha'], headers = headers))
-            commit_data = response_commit.json()
-            if 'stats' in commit_data:
-                user_stats[author]['total_changes'] += commit_data['stats']['total']
+                    url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
+                    response_commit = requests.get(url_commit.format(owner=owner, repo=repo, sha=commit['sha'], headers = headers))
+                    commit_data = response_commit.json()
+                    if 'stats' in commit_data:
+                        user['code_change'] += commit_data['stats']['total']
 
         page += 1
 
-    return jsonify(user_stats)
+    return new_users
 
 def CountIssueAndComment(owner, repo, users):
     new_users = users
@@ -137,9 +135,11 @@ if __name__ == '__main__':
     #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
     #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
     #users = [user1, user2, user3]
-    owner = 'microsoft'
-    repo = 'vscode'
+    owner = 'gregorojstersek'
+    repo = 'resources-to-become-a-great-engineering-leader'
     users = Getusers(owner, repo)
     print(users)
     users = CountIssueAndComment(owner, repo, users)
+    print(users)
+    users = code_changes_stats(owner, repo, users)
     print(users)
