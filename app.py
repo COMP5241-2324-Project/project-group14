@@ -154,6 +154,13 @@ def Deadline_fighter_judge(users, ddl_ratio):
             user['deadline_fighter'] = True
     return users
 
+def User_analysis(owner, repo, deadline, free_ratio, ddl_ratio):
+    users = Getusers(owner, repo)
+    users = CountIssueAndComment(owner, repo, users)
+    users = code_changes_stats(owner, repo, users, deadline)
+    users = Free_rider_judge(users, free_ratio)
+    users = Deadline_fighter_judge(users, ddl_ratio)
+    return users
 
 if __name__ == '__main__':
     #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
@@ -165,11 +172,5 @@ if __name__ == '__main__':
     deadline = '2024-01-19 00:00:00'
     free_ratio = 0.3
     ddl_ratio = 0.8
-    users = Getusers(owner, repo)
-    #print(users)
-    users = CountIssueAndComment(owner, repo, users)
-    #print(users)
-    users = code_changes_stats(owner, repo, users, deadline)
-    users = Free_rider_judge(users, free_ratio)
-    users = Deadline_fighter_judge(users, ddl_ratio)
+    users = User_analysis(owner, repo, deadline, free_ratio, ddl_ratio)
     print(users)
