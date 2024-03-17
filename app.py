@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import requests
+from flask import request
 from flask import jsonify
 import json
 
@@ -12,7 +13,7 @@ def home():
     return render_template('index.html') 
 
 
-@app.route('/projects-list/<string:org')
+@app.route('/projects-list/<string:org>')
 def test(org):
     url = f"https://api.github.com/orgs/{org}/projects"
     response = requests.get(url, headers=headers)
@@ -52,17 +53,22 @@ committer: GitHub username or email address to use to filter by commit committer
 
 Example:https://api.github.com/repos/Flyraty/weekly_travel/commits?sha=main
 '''
-@app.route('/commit-frequency/<string:owner>/<string:repo>/<string:branch>', defaults={'committer': None})
-@app.route('/commit-frequency/<string:owner>/<string:repo>/<string:branch>/<string:committer>')
-def commit_frequency(owner, repo, branch, committer):
-    if(committer == None):
+
+@app.route('/commit-frequency', methods=['POST'])
+def commit_frequency():
+    owner = request.form.get('owner')
+    repo = request.form.get('reporisty')
+    branch = request.form.get('branch')
+    committer = request.form.get('committer')
+
+    if(committer == None or committer == ''):
         url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={branch}"
     else:
         url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={branch}&committer={committer}"
     response = requests.get(url)
     data = response.json()
     commit_frequency = len(data)
-    return jsonify({'commit_frequency': commit_frequency})
+    return render_template('index.html', commit_frequency=commit_frequency)
 
 
 
