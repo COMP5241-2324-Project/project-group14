@@ -20,24 +20,24 @@ user1 = {
     # the contribution score of the member
 }
 
-groups = [group1, group2, group3, ...]
-group1 = {
-    'name': groupname1,       
-    # the group name of the first group
+repos = [repo1, repo2, repo3, ...]
+repo1 = {
+    'name': repo1name,       
+    # the name of the first repo
     'issue_num': 0,          
-    # the number of issues created by this group in the repository
+    # the number of issues in this repository
     'comment_num': 0,        
-    # the number of comments made by this group in all issues in the repository
+    # the number of comments in all issues in the repo
     'commit_num': 0, 
-    # the number of commits submitted by this group in this repository
+    # the number of commits submitted by the contributors in this repo
     'code_change': 0, 
-    # calculate the amount of code changes made by this group in all their commits
+    # calculate the amount of code changes made by the contributors in this repo
     'deadline_change': 0, 
-    # calculate the number of code changes made by this group close to the deadline
+    # calculate the number of code changes made by the contributors in this repo
     'deadline_fighter': False, 
-    # determine whether the member of this group are deadline fighters
+    # determine whether the contributors in this repo are deadline fighters
     'score': 0
-    # the contribution score of the group
+    # the contribution score of the repo
 }
 
 
