@@ -105,7 +105,7 @@ def Deadline_fighter_judge(users, ddl_ratio):
     return users
 
 
-def CreateStringForAI(users):
+def CreateUserStringForAI(users):
     n = len(users)
     ans = 'A certain github repository has a total of %d contributors. The contributions of these contributors to the repository are as follows: \n' % n
     
@@ -125,7 +125,7 @@ def CalcGroupContribution(repoInfo, owner, repo, deadline, free_ratio, ddl_ratio
     users = Free_rider_judge(users, free_ratio)
     users = Deadline_fighter_judge(users, ddl_ratio)
     if needAI == True:
-        AnalysisBot.chat(CreateStringForAI(users))
+        AnalysisBot.chat(CreateUserStringForAI(users))
 
     print('This is everyone\'s info of %s/%s' % (owner, repo))
     print(users)
