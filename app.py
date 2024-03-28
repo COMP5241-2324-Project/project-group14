@@ -79,7 +79,7 @@ def Getusers(owner, repo):
 
     users = []
     for user in all_users:
-        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_change': 0, 'deadline_fighter': False, 'free_rider': False}
+        new_user = {'name': user['login'], 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_change': 0, 'deadline_fighter': False, 'free_rider': False, 'score': 0}
         users.append(new_user)
     return users
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     print(users)
     #users = CountIssueAndComment(owner, repo, users)
     #print(users)
-    CreateStringForAI(users)
+    #CreateStringForAI(users)
 
 
 
