@@ -192,6 +192,8 @@ if __name__ == '__main__':
     #users = [user1, user2, user3]
     #owner = 'microsoft'
     #repo = 'vscode'
+    #owner = ‘gregorojstersek’
+    #repo = ‘resources-to-become-a-great-engineering-leader’
     owner = 'fudan-generative-vision'
     repo = 'champ'
     deadline = '2024-03-27 00:00:00'
