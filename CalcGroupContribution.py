@@ -1,70 +1,8 @@
-from flask import Flask, render_template, jsonify
 import requests, datetime
 import AnalysisBot
 
-
-app = Flask(__name__)
 token = "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"
 headers = {'Authorization': f'token {token}'}
-
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-
-
-@app.route('/comments/<issueID>')
-def comments(issueID):
-    url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issueID)
-    response = requests.get(url, headers = headers)
-    comments = response.json()
-    for comment in comments:
-        print('\n\nComment from user %s:\n %s\n\n' % (comment['user']['login'], comment['body']))
-
-    return jsonify(comments)
-
-
-@app.route('/assignedIssues')
-def assignedIssues():
-    url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
-    issue_response = requests.get(url, headers = headers)
-    issues = issue_response.json()
-    assigned_issue = []
-    for issue in issues:
-         if issue['labels'] != []:
-            assigned_issue.append(issue)
-    for issue in assigned_issue:
-        print('Issue: %s' % issue['title'])
-        cnt = 0
-        for label in issue['labels']:
-            cnt += 1
-            print('Label %d: %s ' % (cnt, label['name']))
-        print('')
-
-    return assigned_issue
-
-@app.route('/code_changes')
-def code_changes():
-    # 初始化一个列表来存储所有的提交
-    all_commits = []
-    page = 1
-    while True:
-        url_commits = "https://api.github.com/repos/{owner}/{repo}/commits?page={page}&per_page=100"
-        response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="project-group14", page=page), headers = headers)
-        commits = response_commits.json()
-        if not commits:
-            break
-
-        for commit in commits:
-            url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-            response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="project-group14", sha=commit['sha'], headers = headers))
-            commit_data = response_commit.json()
-            all_commits.append(commit_data)
-
-        page += 1
-
-    return jsonify(all_commits)
 
 def code_changes_stats(owner, repo, users, deadline):
     new_users = users
@@ -98,6 +36,7 @@ def code_changes_stats(owner, repo, users, deadline):
         page += 1
 
     return new_users
+
 
 def CountIssueAndComment(owner, repo, users):
     new_users = users
@@ -137,6 +76,7 @@ def Getusers(owner, repo):
         users.append(new_user)
     return users
 
+
 def Free_rider_judge(users, free_ratio):
     # 初始化一个字典来存储每个用户的总分
     scores = []
@@ -157,19 +97,13 @@ def Free_rider_judge(users, free_ratio):
 
     return users
 
+
 def Deadline_fighter_judge(users, ddl_ratio):
     for user in users:
         if user['deadline_change'] > user['code_change'] * ddl_ratio:
             user['deadline_fighter'] = True
     return users
 
-def User_analysis(owner, repo, deadline, free_ratio, ddl_ratio):
-    users = Getusers(owner, repo)
-    users = CountIssueAndComment(owner, repo, users)
-    users = code_changes_stats(owner, repo, users, deadline)
-    users = Free_rider_judge(users, free_ratio)
-    users = Deadline_fighter_judge(users, ddl_ratio)
-    return users
 
 def CreateStringForAI(users):
     n = len(users)
@@ -184,23 +118,31 @@ def CreateStringForAI(users):
     return ans
 
 
-if __name__ == '__main__':
-    #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
-    #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
-    #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
-    #users = [user1, user2, user3]
-    #owner = 'microsoft'
-    #repo = 'vscode'
-    #owner = ‘gregorojstersek’
-    #repo = ‘resources-to-become-a-great-engineering-leader’
-    owner = 'fudan-generative-vision'
-    repo = 'champ'
-    deadline = '2024-03-27 00:00:00'
-    free_ratio = 0.3
-    ddl_ratio = 0.8
-    users = User_analysis(owner, repo, deadline, free_ratio, ddl_ratio)
-    CreateStringForAI(users)
+def CalcGroupContribution(repoInfo, owner, repo, deadline, free_ratio, ddl_ratio, needAI = False):
+    users = Getusers(owner, repo)
+    users = CountIssueAndComment(owner, repo, users)
+    users = code_changes_stats(owner, repo, users, deadline)
+    users = Free_rider_judge(users, free_ratio)
+    users = Deadline_fighter_judge(users, ddl_ratio)
+    if needAI == True:
+        AnalysisBot.chat(CreateStringForAI(users))
+
+    print('This is everyone\'s info of %s/%s' % (owner, repo))
     print(users)
-    AnalysisBot.chat(CreateStringForAI(users))
+    deadline_fighter_num = 0
+    
+    for user in users:
+        repoInfo['issue_num'] += user['issue_num']
+        repoInfo['comment_num'] += user['comment_num']
+        repoInfo['commit_num'] += user['commit_num']
+        repoInfo['code_change'] += user['code_change']
+        repoInfo['deadline_change'] += user['deadline_change']
+        repoInfo['score'] += user['score']
+        if user['deadline_fighter'] == True:
+            deadline_fighter_num += 1
 
 
+    if deadline_fighter_num / len(users) > 0.5:
+        repoInfo['deadline_fighter'] = True
+
+    return repoInfo
