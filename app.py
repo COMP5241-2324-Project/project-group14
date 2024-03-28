@@ -138,15 +138,23 @@ def Getusers(owner, repo):
     return users
 
 def Free_rider_judge(users, free_ratio):
-    total_code_change = 0
-    for i in users:
-        total_code_change += i['code_change']
-    
-    Average_code_change = total_code_change / len(users)
+    # 初始化一个字典来存储每个用户的总分
+    scores = {}
 
+    # 计算每个用户的总分
     for user in users:
-        if user['code_change']  < Average_code_change * free_ratio:
-            user['free_rider'] = True
+        scores[user] = users[user]['code_changes'] * 1 + users[user]['issues'] * 50 + users[user]['comments'] * 10 + users[user]['commits'] * 20
+        users[user]['score'] = scores[user]
+
+    # 计算平均分
+    average_score = sum(scores.values()) / len(scores)
+
+    # 判断每个用户是否是free rider
+    for user in users:
+        if scores[user] < average_score * free_ratio:
+            users[user]['free_rider'] = True
+        else:
+            users[user]['free_rider'] = False
 
     return users
 
