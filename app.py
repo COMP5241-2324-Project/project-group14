@@ -162,15 +162,32 @@ def User_analysis(owner, repo, deadline, free_ratio, ddl_ratio):
     users = Deadline_fighter_judge(users, ddl_ratio)
     return users
 
+def CreateStringForAI(users):
+    n = len(users)
+    ans = 'A certain github repository has a total of %d contributors. The contributions of these contributors to the repository are as follows: \n' % n
+    
+    for i in range(n):
+        str = 'Contributor %s published %d issues in the repository, commented %d times, submitted a total of %d commits, and made %d lines of code changes;\n' % (users[i]['name'], users[i]['issue_num'], users[i]['comment_num'], users[i]['commit_num'], users[i]['code_change'])
+        ans += str
+
+    ans += 'Please sort the above contributors in descending order of their contribution.'
+    print(ans)
+    return ans
+
+
 if __name__ == '__main__':
     #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
     #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
     #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
     #users = [user1, user2, user3]
-    owner = 'gregorojstersek'
-    repo = 'resources-to-become-a-great-engineering-leader'
-    deadline = '2024-01-19 00:00:00'
+    owner = 'microsoft'
+    repo = 'vscode'
+    #owner = 'gregorojstersek'
+    #repo = 'resources-to-become-a-great-engineering-leader'
+    deadline = '2024-03-27 00:00:00'
     free_ratio = 0.3
     ddl_ratio = 0.8
     users = User_analysis(owner, repo, deadline, free_ratio, ddl_ratio)
+    CreateStringForAI(users)
     print(users)
+
