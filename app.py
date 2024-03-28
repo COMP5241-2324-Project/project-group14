@@ -1,5 +1,7 @@
 from flask import Flask, render_template, jsonify
 import requests, datetime
+import AnalysisBot
+
 
 app = Flask(__name__)
 token = "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"
@@ -111,7 +113,7 @@ def CountIssueAndComment(owner, repo, users):
             if user['name'] == issue_user_name:
                 user['issue_num'] += 1
         
-        print(issue_id)
+        #print(issue_id)
         comment_url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issue_id)
         comment_response = requests.get(comment_url, headers = headers)
         comments = comment_response.json()
@@ -147,7 +149,7 @@ def Free_rider_judge(users, free_ratio):
             user['free_rider'] = True
 
     return users
-            
+
 def Deadline_fighter_judge(users, ddl_ratio):
     for user in users:
         if user['deadline_change'] > user['code_change'] * ddl_ratio:
@@ -180,14 +182,16 @@ if __name__ == '__main__':
     #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
     #user3 = {'name': 'VSCodeTriageBot', 'issue_num': 0, 'comment_num': 0}
     #users = [user1, user2, user3]
-    owner = 'microsoft'
-    repo = 'vscode'
-    #owner = 'gregorojstersek'
-    #repo = 'resources-to-become-a-great-engineering-leader'
+    #owner = 'microsoft'
+    #repo = 'vscode'
+    owner = 'fudan-generative-vision'
+    repo = 'champ'
     deadline = '2024-03-27 00:00:00'
     free_ratio = 0.3
     ddl_ratio = 0.8
     users = User_analysis(owner, repo, deadline, free_ratio, ddl_ratio)
     CreateStringForAI(users)
     print(users)
+    AnalysisBot.chat(CreateStringForAI(users))
+
 
