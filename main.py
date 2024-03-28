@@ -5,6 +5,8 @@ def CreateNewRepoInfo(owner, name):
     return {'name': owner + '/' + name, 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_change': 0, 'deadline_fighter': False, 'score': 0}
 
 
+def 
+
 
 if __name__ == '__main__':
     filePath = 'groups.txt'
@@ -22,6 +24,7 @@ if __name__ == '__main__':
             print('Now handle %s/%s ' % (owner, name))
             repo = CreateNewRepoInfo(owner, name)
             repo = CalcGroupContribution.CalcGroupContribution(repo, owner, name, deadline, free_ratio, ddl_ratio, needAI = False)
+            print('The info of the whole repo:')
             print(repo)
             repos.append(repo)
             line = f.readline() 

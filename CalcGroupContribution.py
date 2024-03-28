@@ -118,7 +118,7 @@ def CreateStringForAI(users):
     return ans
 
 
-def CalcGroupContribution(oldRepoInfo, owner, repo, deadline, free_ratio, ddl_ratio, needAI = False):
+def CalcGroupContribution(repoInfo, owner, repo, deadline, free_ratio, ddl_ratio, needAI = False):
     users = Getusers(owner, repo)
     users = CountIssueAndComment(owner, repo, users)
     users = code_changes_stats(owner, repo, users, deadline)
@@ -127,22 +127,22 @@ def CalcGroupContribution(oldRepoInfo, owner, repo, deadline, free_ratio, ddl_ra
     if needAI == True:
         AnalysisBot.chat(CreateStringForAI(users))
 
-    n = len(users)
+    print('This is everyone\'s info of %s/%s' % (owner, repo))
+    print(users)
     deadline_fighter_num = 0
-    repoInfo = oldRepoInfo
     
-    for i in range(n):
-        repoInfo['issue_num'] += users[i]['issue_num']
-        repoInfo['comment_num'] += users[i]['comment_num']
-        repoInfo['commit_num'] += users[i]['commit_num']
-        repoInfo['code_change'] += users[i]['code_change']
-        repoInfo['deadline_change'] += users[i]['deadline_change']
-        repoInfo['score'] += users[i]['score']
-        if users[i]['deadline_fighter'] == True:
+    for user in users:
+        repoInfo['issue_num'] += user['issue_num']
+        repoInfo['comment_num'] += user['comment_num']
+        repoInfo['commit_num'] += user['commit_num']
+        repoInfo['code_change'] += user['code_change']
+        repoInfo['deadline_change'] += user['deadline_change']
+        repoInfo['score'] += user['score']
+        if user['deadline_fighter'] == True:
             deadline_fighter_num += 1
 
 
-    if deadline_fighter_num / n > 0.5:
+    if deadline_fighter_num / len(users) > 0.5:
         repoInfo['deadline_fighter'] = True
 
-    return users
+    return repoInfo
