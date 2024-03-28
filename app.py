@@ -84,6 +84,19 @@ def Getusers(owner, repo):
     return users
 
 
+def CreateStringForAI(users):
+    n = len(users)
+    ans = 'A certain github repository has a total of %d contributors. The contributions of these contributors to the repository are as follows: \n' % n
+    
+    for i in range(n):
+        str = 'Contributor %s published %d issues in the repository, commented %d times, submitted a total of %d commits, and made %d lines of code changes;\n' % (users[i]['name'], users[i]['issue_num'], users[i]['comment_num'], users[i]['commit_num'], users[i]['code_change'])
+        ans += str
+
+    ans += 'Please sort the above contributors in descending order of their contribution.'
+    print(ans)
+    return ans
+
+
 if __name__ == '__main__':
     #user1 = {'name': 'zerg', 'issue_num': 0, 'comment_num': 0}
     #user2 = {'name': 'Nimbid04', 'issue_num': 0, 'comment_num': 0}
@@ -93,29 +106,12 @@ if __name__ == '__main__':
     repo = 'vscode'
     users = Getusers(owner, repo)
     print(users)
-    users = CountIssueAndComment(owner, repo, users)
-    print(users)
+    #users = CountIssueAndComment(owner, repo, users)
+    #print(users)
+    CreateStringForAI(users)
 
 
 
 
 
-
-user1 = {
-    'name': username1,       
-    # the username of the first user
-    'issue_num': 0,          
-    # the number of issues created by this member in the repository
-    'comment_num': 0,        
-    # the number of comments made by this member in all issues in the repository
-    'commit_num': 0, 
-    # the number of commits submitted by this member in this repository
-    'code_change': 0, 
-    # calculate the amount of code changes made by this member in all his/her commits
-    'deadline_change': 0, 
-    # calculate the number of code changes made by this member close to the deadline
-    'deadline_fighter': False, 
-    # determine whether the member is a deadline fighter
-    'free_rider': False
-    # determine whether the member is a free rider
-}
+                                                                                                                                                                                                                                                                                   
