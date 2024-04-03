@@ -187,7 +187,8 @@
                             <i class="fa fa-chart-line fa-3x text-primary"></i>
                             <div class="ms-3">
                                 <p class="mb-2">Total Commit</p>
-                                <h6 class="mb-0">1234</h6>
+                                <!-- 查询值获取total commit信息 -->
+                                <h6 id="totalCommit" class="mb-0">1234</h6>
                             </div>
                         </div>
                     </div>
@@ -196,7 +197,7 @@
                             <i class="fa fa-chart-bar fa-3x text-primary"></i>
                             <div class="ms-3">
                                 <p class="mb-2">Total Groups</p>
-                                <h6 class="mb-0">20</h6>
+                                <h6 id="totalGroups" class="mb-0">20</h6>
                             </div>
                         </div>
                     </div>
@@ -204,8 +205,8 @@
                         <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
                             <i class="fa fa-chart-area fa-3x text-primary"></i>
                             <div class="ms-3">
-                                <p class="mb-2">Today Numbers</p>
-                                <h6 class="mb-0">100</h6>
+                                <p class="mb-2">Total Numbers</p>
+                                <h6 id="totalNumbers" class="mb-0">100</h6>
                             </div>
                         </div>
                     </div>
@@ -238,7 +239,8 @@
                                     <!-- <label for="floatingInput"></label>        -->
                                 </div>
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary">Query</button>                            
+                                    <!-- 点击按钮后，调取后端接口，返回issues，comments，code changes信息 -->
+                                    <button type="submit" id="queryButton" class="btn btn-primary">Query</button>                            
                                 </div>
                             </div>
                             <canvas id="worldwide-sales"></canvas>
@@ -252,11 +254,12 @@
                             </div>
                             <div class="form-floating mb-3 col-sm-12 col-xl-12 row">
                                 <div class="col">
-                                    <input type="text" class="form-control" id="floatingInput" placeholder="Search group">
+                                    <input type="text" class="form-control" id="floatingInput1" placeholder="Search group">
                                     <!-- <label for="floatingInput"></label>        -->
                                 </div>
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary">Query</button>                            
+                                    <!-- 点击按钮后，调取后端接口，返回某组各个时间段的commit frequency信息 -->
+                                    <button type="submit" id="queryButton1" class="btn btn-primary">Query</button>                            
                                 </div>
                             </div>
                             <canvas id="salse-revenue"></canvas>
@@ -270,11 +273,12 @@
                             </div>
                             <div class="form-floating mb-3 col-sm-12 col-xl-12 row">
                                 <div class="col">
-                                    <input type="text" class="form-control" id="floatingInput" placeholder="Search group">
+                                    <input type="text" class="form-control" id="floatingInput2" placeholder="Search group">
                                     <!-- <label for="floatingInput"></label>        -->
                                 </div>
                                 <div class="col-auto">
-                                    <button type="submit" class="btn btn-primary">Query</button>                            
+                                    <!-- 点击按钮后，调取后端接口，返回某组各个成员的贡献度 -->
+                                    <button type="submit" id="queryButton2" class="btn btn-primary">Query</button>                            
                                 </div>
                             </div>
                             <canvas id="pie-chart"></canvas>
@@ -309,7 +313,7 @@
                         <h6 class="mb-0">Deadline Fighters</h6>
                         <a href="">Show All</a>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="deadline-fighters">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <thead>
                                 <tr class="text-white">
@@ -320,7 +324,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                <!-- <tr>
                                     <td><input class="form-check-input" type="checkbox"></td>
                                     <td>group 1</td>
                                     <td>12345678</td>
@@ -349,7 +353,7 @@
                                     <td>group 1</td>
                                     <td>12345678</td>
                                     <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
@@ -363,7 +367,7 @@
                         <h6 class="mb-0">Free Riders</h6>
                         <a href="">Show All</a>
                     </div>
-                    <div class="table-responsive">
+                    <div class="table-responsive" id="free-riders">
                         <table class="table text-start align-middle table-bordered table-hover mb-0">
                             <thead>
                                 <tr class="text-white">
@@ -374,7 +378,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                <!-- <tr>
                                     <td><input class="form-check-input" type="checkbox"></td>
                                     <td>group 1</td>
                                     <td>12345678</td>
@@ -403,37 +407,42 @@
                                     <td>group 1</td>
                                     <td>12345678</td>
                                     <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-secondary rounded h-100 p-4">
                     <h6 class="mb-4">AI Analysis</h6>
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="floatingInput"
+                        <input type="text" class="form-control" id="repository-name"
                             placeholder="name@example.com">
                         <label for="floatingInput">Repository Name</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="floatingPassword"
+                        <input type="text" class="form-control" id="repository-owner"
                             placeholder="Password">
                         <label for="floatingPassword">Repository Owner</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <select class="form-select" id="floatingSelect"
+                        <select class="form-select" id="function-select"
                             aria-label="Floating label select example">
                             <option selected>Member contribution</option>
                             <option value="1">Group progress</option>
                         </select>
                         <label for="floatingSelect">Analysis with selects</label>
                     </div>
+                    <div class="form-floating mb-3">
+                        <!-- 点击按钮，获取上面所填写的信息，然后查询后端，返回结果给前端 -->
+                        <button type="submit" id="ai-query" class="btn btn-primary">Query</button>                            
+                    </div>
                     <div class="form-floating">
-                        <textarea class="form-control" placeholder="Leave a comment here"
+                        <textarea id="ai-answer" class="form-control" placeholder="Leave a comment here"
                             id="floatingTextarea" style="height: 150px;"></textarea>
-                        <label for="floatingTextarea">AI Anaswer</label>
+                        <label for="floatingTextarea">AI Answer</label>
                     </div>
                 </div>
             </div>
@@ -597,6 +606,94 @@
 
     <!-- Template Javascript -->
     <script src="{{url_for('static',filename='js/main.js')}}"></script>
+    <script>
+        window.onload = function() {
+            // 获取总体信息
+            fetch('/getTotalInfo')
+            .then(response => response.json())
+            .then(data => {
+                // 使用从后端接口获取的数据更新页面
+                document.querySelector('#totalCommit').textContent = data.totalCommit;
+                document.querySelector('#totalGroups').textContent = data.totalGroups;
+                document.querySelector('#totalNumbers').textContent = data.totalNumbers;
+            })
+            .catch(error => console.error('Error:', error));
+            //  获取deadline fighters
+            fetch('/getDeadlineFighters') // 调用后端接口
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#deadline-fighters tbody');
+
+                data.forEach(group => {
+                    const row = document.createElement('tr');
+
+                    const checkboxCell = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
+                    checkboxCell.appendChild(checkbox);
+
+                    const groupNameCell = document.createElement('td');
+                    groupNameCell.textContent = group.name;
+
+                    const studentCell = document.createElement('td');
+                    studentCell.textContent = group.student;
+
+                    const actionCell = document.createElement('td');
+                    const detailLink = document.createElement('a');
+                    detailLink.className = 'btn btn-sm btn-primary';
+                    detailLink.href = `/groupDetail/${group.name}`;
+                    detailLink.textContent = 'Detail';
+                    actionCell.appendChild(detailLink);
+
+                    row.appendChild(checkboxCell);
+                    row.appendChild(groupNameCell);
+                    row.appendChild(studentCell);
+                    row.appendChild(actionCell);
+
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error:', error));    
+            //  获取free riders
+            fetch('/getFreeRiders') // 调用后端接口
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#free-riders tbody');
+
+                data.forEach(group => {
+                    const row = document.createElement('tr');
+
+                    const checkboxCell = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-check-input';
+                    checkboxCell.appendChild(checkbox);
+
+                    const groupNameCell = document.createElement('td');
+                    groupNameCell.textContent = group.name;
+
+                    const studentCell = document.createElement('td');
+                    studentCell.textContent = group.student;
+
+                    const actionCell = document.createElement('td');
+                    const detailLink = document.createElement('a');
+                    detailLink.className = 'btn btn-sm btn-primary';
+                    detailLink.href = `/groupDetail/${group.name}`;
+                    detailLink.textContent = 'Detail';
+                    actionCell.appendChild(detailLink);
+
+                    row.appendChild(checkboxCell);
+                    row.appendChild(groupNameCell);
+                    row.appendChild(studentCell);
+                    row.appendChild(actionCell);
+
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error:', error));  
+        };
+    </script>
 </body>
 
 </html>

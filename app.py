@@ -12,6 +12,57 @@ headers = {"Authorization": f"Bearer {token}"}
 def home():
     return render_template('index.html') 
 
+# 获取所有group的commit数量，一共有多少group，一共有多少成员
+@app.route('/getTotalInfo')
+def getTotalInfo():
+    data ={'totalCommit':30,'totalGroups':40,'totalNumbers':50}
+    return jsonify(data)
+
+@app.route('/getGroupInfo')
+def getGroupInfo():
+    group = request.args.get('group')
+    data ={'issues':20,'comments':30,'codeChanges':40}
+    return jsonify(data)
+
+@app.route('/getGroupCommitFrequency')
+def getGroupCommitFrequency():
+    group = request.args.get('group')
+    data ={
+        'group':group,
+        'commitFrequency':[35, 50, 55, 75, 95, 125, 145]
+        }
+    return jsonify(data)
+
+@app.route('/getGroupMemberContributor')
+def getGroupMemberContributor():
+    group = request.args.get('group')
+    data ={
+        'group':group,
+        'labels':["student 1", "student 2", "student 3", "student 4", "student 5"],
+        'memberContributor':[55, 49, 44, 24, 15]
+        }
+    return jsonify(data)
+
+@app.route('/getDeadlineFighters')
+def getDeadlineFighters():
+    data =[{'name':'group1','student':'Bob'},{'name':'group2','student':'Alicy'},{'name':'group3','student':'niko'}]
+    return jsonify(data)
+
+@app.route('/getFreeRiders')
+def getFreeRiders():
+    data =[{'name':'group4','student':'Bob'},{'name':'group5','student':'Alicy'},{'name':'group6','student':'niko'}]
+    return jsonify(data)
+
+@app.route('/getInfoFromAi', methods=['POST'])
+def getInfoFromAi():
+    data = request.get_json()
+    group_name, group_owner, function_select = data.get('group_name'), data.get('group_owner'), data.get('function_select')
+    response_data = {}
+    if function_select == 'Member contribution':
+        response_data = {'answer':'this is Member contribution function '+group_name+' '+group_owner}
+    else:
+        response_data = {'answer':'this is Group progress function '+group_name+' '+group_owner}
+    return jsonify(response_data)
 
 @app.route('/projects-list/<string:org>')
 def test(org):
