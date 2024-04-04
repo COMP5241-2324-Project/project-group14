@@ -128,8 +128,11 @@ def commit_frequency():
 
 
 
-@app.route('/comments/<issueID>')
-def comments(issueID):
+@app.route('/comments/<issueID>', methods=['POST'])
+def comments():
+    issueID = request.args.get('issueID')
+    owner = request.args.get('owner')
+    repo = request.args.get('repo')
     url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, issueID)
     response = requests.get(url, headers = headers)
     comments = response.json()
@@ -139,8 +142,10 @@ def comments(issueID):
     return jsonify(comments)
 
 
-@app.route('/assignedIssues')
+@app.route('/assignedIssues', methods=['POST'])
 def assignedIssues():
+    owner = request.args.get('owner')
+    repo = request.args.get('repo')
     url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
     issue_response = requests.get(url, headers = headers)
     issues = issue_response.json()
@@ -179,3 +184,6 @@ def code_changes():
         page += 1
 
     return jsonify(all_commits)
+
+if __name__ == '__main__':
+    app.run(debug=True)
