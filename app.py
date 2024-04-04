@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify
 import requests, datetime
 import AnalysisBot
-
+import CalcGroupContribution
 from flask import request
 from flask import jsonify
 import json
@@ -9,7 +9,9 @@ import json
 app = Flask(__name__)
 token = "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"
 headers = {'Authorization': f'token {token}'}
-
+deadline = '2024-04-07 00:00:00'
+free_ratio = 0.3
+ddl_ratio = 0.8
 
 @app.route('/')
 def home():
@@ -18,23 +20,115 @@ def home():
 # 获取所有group的commit数量，一共有多少group，一共有多少成员
 @app.route('/getTotalInfo')
 def getTotalInfo():
-    data ={'totalCommit':30,'totalGroups':40,'totalNumbers':50}
+    owner = "COMP5241-2324-Project"
+    repo = "project-group14"
+    totalCommit = get_commit_count(owner, repo)
+    totalNumbers =get_contributor_count(owner, repo)
+    if totalCommit > 100:
+        totalCommit = '100+'
+    if totalNumbers > 100:
+        totalNumbers = '100+'
+    data ={'totalCommit':totalCommit, 'totalGroups': 20,'totalNumbers':totalNumbers}
     return jsonify(data)
 
+def get_commit_count(owner, repo):
+    page = 1
+    count = 0
+    while True:
+        url = f"https://api.github.com/repos/{owner}/{repo}/commits?page={page}"
+        response = requests.get(url, headers=headers)
+        commits = response.json()
+        if not commits:
+            break
+        count += len(commits)
+        page += 1
+        if count > 100:
+            return count
+    return count
+
+def get_contributor_count(owner, repo):
+    page = 1
+    count = 0
+    while True:
+        url = f"https://api.github.com/repos/{owner}/{repo}/contributors?page={page}"
+        response = requests.get(url, headers=headers)
+        contributors = response.json()
+        if not contributors:
+            break
+        count += len(contributors)
+        page += 1
+        if count > 100:
+            return count
+    return count
+
+# 获取group的信息，包括issues数量，comments数量，code changes数量
 @app.route('/getGroupInfo')
 def getGroupInfo():
+    owner = "COMP5241-2324-Project"
+    repo = "project-group14"
     group = request.args.get('group')
-    data ={'issues':20,'comments':30,'codeChanges':40}
+    issues_count, issues_id = get_issues_count(owner, repo)
+    comments_count = get_comments_count(owner, repo, issues_id)
+    
+    data ={'issues':issues_count,'comments':comments_count,'codeChanges':40}
     return jsonify(data)
+
+def get_issues_count(owner, repo):
+    url = 'https://api.github.com/repos/%s/%s/issues' % (owner, repo)
+    issue_response = requests.get(url, headers = headers)
+    issues = issue_response.json()
+    assigned_issue = []
+    issue_id = []
+    for issue in issues:
+         if issue['labels'] != []:
+            assigned_issue.append(issue)
+            issue_id.append(issue['id'])
+    for issue in assigned_issue:
+        print('Issue: %s' % issue['title'])
+        cnt = 0
+        for label in issue['labels']:
+            cnt += 1
+            print('Label %d: %s ' % (cnt, label['name']))
+        print('')
+
+    return len(assigned_issue),issue_id
+
+def get_comments_count(owner, repo, issue_id):
+    count = 0
+    for id in issue_id:
+        url = 'https://api.github.com/repos/%s/%s/issues/%s/comments' % (owner, repo, id)
+        response = requests.get(url, headers = headers)
+        comments = response.json()
+        count += len(comments)
+    return count
+
 
 @app.route('/getGroupCommitFrequency')
 def getGroupCommitFrequency():
     group = request.args.get('group')
+    owner = "COMP5241-2324-Project"
+    commits = get_commits(owner, group)
+    commit_frequency = [0,0,0,0,0,0]
+    for commit in commits:
+        date = commit['commit']['author']['date']
+        date = datetime.datetime.strptime(commits[0]['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
+        days = date.month*30 + date.day
+        commit_frequency[(days-57)/7] += 1
+    count = 0
+    for i in commit_frequency:
+        count += i
+        commit_frequency[i] = count
     data ={
         'group':group,
-        'commitFrequency':[35, 50, 55, 75, 95, 125, 145]
+        'commitFrequency':commit_frequency
         }
     return jsonify(data)
+
+def get_commits(owner, repo):
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits"
+    response = requests.get(url, headers=headers)
+    commits = response.json()
+    return commits
 
 @app.route('/getGroupMemberContributor')
 def getGroupMemberContributor():
@@ -48,24 +142,80 @@ def getGroupMemberContributor():
 
 @app.route('/getDeadlineFighters')
 def getDeadlineFighters():
-    data =[{'name':'group1','student':'Bob'},{'name':'group2','student':'Alicy'},{'name':'group3','student':'niko'}]
+    group_names = ['group4','group14']
+    group_owner = 'COMP5241-2324-Project'
+    data = []
+    for group in group_names:
+        users = CalcGroupContribution.Getusers(group_owner, group)
+        users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)
+        users = CalcGroupContribution.code_changes_stats(group_owner, group, users, deadline)
+        users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+        for user in users:
+            if user['deadline_fighter'] == True:
+                data.append({'name':group,'student':user['name']})
     return jsonify(data)
 
 @app.route('/getFreeRiders')
 def getFreeRiders():
-    data =[{'name':'group4','student':'Bob'},{'name':'group5','student':'Alicy'},{'name':'group6','student':'niko'}]
+    group_names = ['group4','group14']
+    group_owner = 'COMP5241-2324-Project'
+    data = []
+    for group in group_names:
+        users = CalcGroupContribution.Getusers(group_owner, group)
+        users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)
+        users = CalcGroupContribution.code_changes_stats(group_owner, group, users, deadline)
+        users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+        for user in users:
+            if user['free_rider'] == True:
+                data.append({'name':group,'student':user['name']})
     return jsonify(data)
+
+
 
 @app.route('/getInfoFromAi', methods=['POST'])
 def getInfoFromAi():
     data = request.get_json()
-    group_name, group_owner, function_select = data.get('group_name'), data.get('group_owner'), data.get('function_select')
-    response_data = {}
-    if function_select == 'Member contribution':
-        response_data = {'answer':'this is Member contribution function '+group_name+' '+group_owner}
-    else:
-        response_data = {'answer':'this is Group progress function '+group_name+' '+group_owner}
+    group_name, group_owner = data.get('group_name'), data.get('group_owner')
+    users = CalcGroupContribution.Getusers(group_owner, group_name)
+    users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
+    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    users = CalcGroupContribution.Free_rider_judge(users, free_ratio)
+    users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+    resp = AnalysisBot.chat(CalcGroupContribution.CreateUserStringForAI(users))
+    response_data = {'answer':resp}
     return jsonify(response_data)
+
+@app.route('/getGroupInfoFromAi', methods=['POST'])
+def getGroupInfoFromAi():
+    data = request.get_json()
+    group_name1, group_name2, group_owner = data.get('group_name1'), data.get('group_name2'),data.get('group_owner')
+    repo1 = CreateNewRepoInfo(group_owner, group_name1)
+    repo1 = CalcGroupContribution.CalcGroupContribution(repo1, group_owner, group_name1, deadline, free_ratio, ddl_ratio, needAI = False)
+    repo2 = CreateNewRepoInfo(group_owner, group_name2)
+    repo2 = CalcGroupContribution.CalcGroupContribution(repo2, group_owner, group_name2, deadline, free_ratio, ddl_ratio, needAI = False)
+    repos = []
+    repos.append(repo1)
+    repos.append(repo2)
+    resp = AnalysisBot.chat(CreateRepoStringForAI(repos))
+    response_data = {'answer':resp}
+    return jsonify(response_data)
+
+def CreateNewRepoInfo(owner, name):
+    return {'name': owner + '/' + name, 'issue_num': 0, 'comment_num': 0, 'commit_num': 0, 'code_change': 0, 'deadline_change': 0, 'deadline_fighter': False, 'score': 0}
+
+
+def CreateRepoStringForAI(repos):
+    n = len(repos)
+    ans = 'There are %d github repositories in total. The workload of these repositories to the repository are as follows: \n' % n
+    
+    for i in range(n):
+        str = 'repository %s had %d issues, %d comments, a total of %d commits, and made %d lines of code changes;\n' % (repos[i]['name'], repos[i]['issue_num'], repos[i]['comment_num'], repos[i]['commit_num'], repos[i]['code_change'])
+        ans += str
+
+    ans += 'Please sort the above repositories in descending order of their workload.'
+    print(ans)
+    return ans
+
 
 @app.route('/projects-list/<string:org>')
 def test(org):
@@ -164,20 +314,20 @@ def assignedIssues():
     return assigned_issue
 
 @app.route('/code_changes')
-def code_changes():
+def code_changes(owner, repo):
     # 初始化一个列表来存储所有的提交
     all_commits = []
     page = 1
     while True:
         url_commits = "https://api.github.com/repos/{owner}/{repo}/commits?page={page}&per_page=100"
-        response_commits = requests.get(url_commits.format(owner="COMP5241-2324-Project", repo="project-group14", page=page), headers = headers)
+        response_commits = requests.get(url_commits.format(owner, repo, page=page), headers = headers)
         commits = response_commits.json()
         if not commits:
             break
 
         for commit in commits:
             url_commit = "https://api.github.com/repos/{owner}/{repo}/commits/{sha}"
-            response_commit = requests.get(url_commit.format(owner="COMP5241-2324-Project", repo="project-group14", sha=commit['sha'], headers = headers))
+            response_commit = requests.get(url_commit.format(owner, repo, sha=commit['sha'], headers = headers))
             commit_data = response_commit.json()
             all_commits.append(commit_data)
 

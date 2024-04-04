@@ -20,7 +20,7 @@ def CreateRepoStringForAI(repos):
 
 if __name__ == '__main__':
     filePath = 'groups.txt'
-    deadline = '2024-03-27 00:00:00'
+    deadline = '2024-04-07 00:00:00'
     free_ratio = 0.3
     ddl_ratio = 0.8
 
