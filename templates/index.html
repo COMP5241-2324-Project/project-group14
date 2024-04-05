@@ -33,15 +33,15 @@
 <body>
     <div class="container-fluid position-relative d-flex p-0">
         <!-- Spinner Start -->
-        <div id="spinner" class="show bg-dark position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
+        <!-- <div id="spinner" class="show bg-dark position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
             <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                 <span class="sr-only">Loading...</span>
             </div>
-        </div>
+        </div> -->
         <!-- Spinner End -->
 
         <!-- Content Start -->
-        <div class="content" >
+        <div class="content">
 
             <!-- Sale & Revenue Start -->
             <div class="container-fluid pt-4 px-4">
@@ -129,7 +129,7 @@
                             <canvas id="salse-revenue"></canvas>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-xl-6">
+                    <!-- <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary rounded h-100 p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <h6 class="mb-0">Number Contributor</h6>
@@ -138,17 +138,15 @@
                             <div class="form-floating mb-3 col-sm-12 col-xl-12 row">
                                 <div class="col">
                                     <input type="text" class="form-control" id="floatingInput2" placeholder="Search group">
-                                    <!-- <label for="floatingInput"></label>        -->
                                 </div>
                                 <div class="col-auto">
-                                    <!-- 点击按钮后，调取后端接口，返回某组各个成员的贡献度 -->
                                     <button type="submit" id="queryButton2" class="btn btn-primary">Query</button>                            
                                 </div>
                             </div>
                             <canvas id="pie-chart"></canvas>
                         </div>
-                    </div>
-                    <div class="col-sm-12 col-xl-6">
+                    </div> -->
+                    <!-- <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary rounded h-100 p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
                                 <h6 class="mb-0">Doughnut Chart</h6>
@@ -157,7 +155,6 @@
                             <div class="form-floating mb-3 col-sm-12 col-xl-12 row">
                                 <div class="col">
                                     <input type="text" class="form-control" id="floatingInput" placeholder="Search group">
-                                    <!-- <label for="floatingInput"></label>        -->
                                 </div>
                                 <div class="col-auto">
                                     <button type="submit" class="btn btn-primary">Query</button>                            
@@ -165,7 +162,7 @@
                             </div>
                             <canvas id="doughnut-chart"></canvas>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
             <!-- Sales Chart End -->
@@ -234,31 +231,69 @@
 
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-secondary rounded h-100 p-4">
-                    <h6 class="mb-4">AI Analysis</h6>
-                    <div class="form-floating mb-3">
-                        <input type="text" class="form-control" id="repository-name"
-                            placeholder="name@example.com">
-                        <label for="floatingInput">Repository Name</label>
-                    </div>
+                    <h6 class="mb-4">AI Analysis Member Contributor</h6>
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="repository-owner"
                             placeholder="Password">
                         <label for="floatingPassword">Repository Owner</label>
                     </div>
                     <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="repository-name"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Repository Name</label>
+                    </div>
+                    <!-- <div class="form-floating mb-3">
                         <select class="form-select" id="function-select"
                             aria-label="Floating label select example">
                             <option selected>Member contribution</option>
                             <option value="1">Group progress</option>
                         </select>
                         <label for="floatingSelect">Analysis with selects</label>
-                    </div>
+                    </div> -->
                     <div class="form-floating mb-3">
                         <!-- 点击按钮，获取上面所填写的信息，然后查询后端，返回结果给前端 -->
                         <button type="submit" id="ai-query" class="btn btn-primary">Query</button>                            
                     </div>
                     <div class="form-floating">
                         <textarea id="ai-answer" class="form-control" placeholder="Leave a comment here"
+                            id="floatingTextarea" style="height: 150px;"></textarea>
+                        <label for="floatingTextarea">AI Answer</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container-fluid pt-4 px-4">
+                <div class="bg-secondary rounded h-100 p-4">
+                    <h6 class="mb-4">AI Analysis Group Progress</h6>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="repository-owner1"
+                            placeholder="Password">
+                        <label for="floatingPassword">Repository Owner</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="repository-name1"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">First Repository Name</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="repository-name2"
+                            placeholder="name@example.com">
+                        <label for="floatingInput">Second Repository Name</label>
+                    </div>
+                    <!-- <div class="form-floating mb-3">
+                        <select class="form-select" id="function-select"
+                            aria-label="Floating label select example">
+                            <option selected>Member contribution</option>
+                            <option value="1">Group progress</option>
+                        </select>
+                        <label for="floatingSelect">Analysis with selects</label>
+                    </div> -->
+                    <div class="form-floating mb-3">
+                        <!-- 点击按钮，获取上面所填写的信息，然后查询后端，返回结果给前端 -->
+                        <button type="submit" id="ai-query1" class="btn btn-primary">Query</button>                            
+                    </div>
+                    <div class="form-floating">
+                        <textarea id="ai-answer1" class="form-control" placeholder="Leave a comment here"
                             id="floatingTextarea" style="height: 150px;"></textarea>
                         <label for="floatingTextarea">AI Answer</label>
                     </div>

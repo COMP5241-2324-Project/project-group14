@@ -63,14 +63,13 @@
     Chart.defaults.color = "#6C7293";
     Chart.defaults.borderColor = "#000000";
 
-    // 点击按钮 在mychart2上添加数据
     document.querySelector('#ai-query').addEventListener('click', function(event) {
         event.preventDefault(); // 阻止表单的默认提交行为
     
         const group_name = document.querySelector('#repository-name').value; // 获取输入的组名
         const group_owner = document.querySelector('#repository-owner').value;
-        const function_select = document.querySelector('#function-select').value;
-        const data = {group_name, group_owner, function_select}
+        // const function_select = document.querySelector('#function-select').value;
+        const data = {group_name, group_owner}
         console.log(data)
         fetch('/getInfoFromAi',{
             method: 'POST',
@@ -83,6 +82,30 @@
         .then(response => response.json())
         .then(data => {
             document.querySelector('#ai-answer').value = data.answer;
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    document.querySelector('#ai-query1').addEventListener('click', function(event) {
+        event.preventDefault(); // 阻止表单的默认提交行为
+    
+        const group_name1 = document.querySelector('#repository-name1').value; // 获取输入的组名
+        const group_name2 = document.querySelector('#repository-name2').value; // 获取输入的组名
+        const group_owner = document.querySelector('#repository-owner1').value;
+        // const function_select = document.querySelector('#function-select').value;
+        const data = {group_name1, group_name2, group_owner}
+        console.log(data)
+        fetch('/getGroupInfoFromAi',{
+            method: 'POST',
+            headers:{
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+            
+        }) // 调用后端接口
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('#ai-answer1').value = data.answer;
         })
         .catch(error => console.error('Error:', error));
     });

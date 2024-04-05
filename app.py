@@ -4,7 +4,7 @@ import AnalysisBot
 import CalcGroupContribution
 from flask import request
 from flask import jsonify
-import json
+import json, redis
 
 app = Flask(__name__)
 token = "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"
@@ -12,6 +12,8 @@ headers = {'Authorization': f'token {token}'}
 deadline = '2024-04-07 00:00:00'
 free_ratio = 0.3
 ddl_ratio = 0.8
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
 @app.route('/')
 def home():
@@ -22,14 +24,21 @@ def home():
 def getTotalInfo():
     owner = "COMP5241-2324-Project"
     repo = "project-group14"
-    totalCommit = get_commit_count(owner, repo)
-    totalNumbers =get_contributor_count(owner, repo)
-    if totalCommit > 100:
-        totalCommit = '100+'
-    if totalNumbers > 100:
-        totalNumbers = '100+'
-    data ={'totalCommit':totalCommit, 'totalGroups': 20,'totalNumbers':totalNumbers}
-    return jsonify(data)
+
+    totalCommit = redis_client.get('totalCommit').decode('utf-8')
+    if  totalCommit == None:
+        totalCommit = get_commit_count(owner, repo)
+        totalNumbers =get_contributor_count(owner, repo)
+        data ={'totalCommit':totalCommit, 'totalGroups': 20,'totalNumbers':totalNumbers}
+        redis_client.set('totalCommit', totalCommit)
+        redis_client.set('totalNumbers', totalNumbers)
+        redis_client.set('totalGroups', 20)
+        return jsonify(data)
+    else:
+        totalNumbers = redis_client.get('totalNumbers').decode('utf-8')
+        totalGroups = redis_client.get('totalGroups').decode('utf-8')
+        data ={'totalCommit':totalCommit, 'totalGroups': totalGroups,'totalNumbers':totalNumbers}
+        return jsonify(data)
 
 def get_commit_count(owner, repo):
     page = 1
@@ -108,15 +117,17 @@ def getGroupCommitFrequency():
     group = request.args.get('group')
     owner = "COMP5241-2324-Project"
     commits = get_commits(owner, group)
-    commit_frequency = [0,0,0,0,0,0]
+    commit_frequency = [0,0,0,0,0,0,0]
     for commit in commits:
         date = commit['commit']['author']['date']
         date = datetime.datetime.strptime(commits[0]['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
-        days = date.month*30 + date.day
-        commit_frequency[(days-57)/7] += 1
+        days = (date.month-1)*30 + date.day
+        index = (days-57)//7
+        print(days)
+        commit_frequency[index] += 1
     count = 0
-    for i in commit_frequency:
-        count += i
+    for i in range(len(commit_frequency)):
+        count += commit_frequency[i]
         commit_frequency[i] = count
     data ={
         'group':group,
@@ -142,8 +153,14 @@ def getGroupMemberContributor():
 
 @app.route('/getDeadlineFighters')
 def getDeadlineFighters():
-    group_names = ['group4','group14']
+    group_names = ['project-group4','project-group14']
     group_owner = 'COMP5241-2324-Project'
+    deadlineFighters = redis_client.lrange('deadline_fighters',0,-1)
+    if deadlineFighters != None:
+        data = []
+        for fighter in deadlineFighters:
+            data.append(json.loads(fighter))
+        return jsonify(data)
     data = []
     for group in group_names:
         users = CalcGroupContribution.Getusers(group_owner, group)
@@ -157,9 +174,15 @@ def getDeadlineFighters():
 
 @app.route('/getFreeRiders')
 def getFreeRiders():
-    group_names = ['group4','group14']
+    group_names = ['project-group4','project-group14']
     group_owner = 'COMP5241-2324-Project'
     data = []
+    deadlineFighters = redis_client.lrange('free_riders',0,-1)
+    if deadlineFighters != None:
+        data = []
+        for fighter in deadlineFighters:
+            data.append(json.loads(fighter))
+        return jsonify(data)
     for group in group_names:
         users = CalcGroupContribution.Getusers(group_owner, group)
         users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)
