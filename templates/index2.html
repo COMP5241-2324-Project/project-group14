@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pull Request Dashboard</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pull Request Dashboard</h1>
+    <button onclick="fetchPRData()">Load Pull Request Data</button>
+    <table id="prTable">
+        <thead>
+            <tr>
+                <th>PR Number</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        function fetchPRData() {
+            fetch('/pr_data') // 从Flask服务器获取PR数据
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data);
+                })
+                .catch(error => console.error('Error loading PR data:', error));
+        }
+
+        function updateTable(prs) {
+            const tableBody = document.getElementById('prTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // 清除现有的表格数据
+
+            prs.forEach(pr => {
+                let row = tableBody.insertRow();
+                let cell1 = row.insertCell(0);
+                let cell2 = row.insertCell(1);
+                let cell3 = row.insertCell(2);
+                let cell4 = row.insertCell(3);
+
+                cell1.textContent = pr.number;
+                cell2.textContent = pr.title;
+                cell3.textContent = pr.author;
+                cell4.textContent = pr.is_merged ? 'Merged' : 'Closed without merging';
+            });
+        }
+    </script>
+</body>
+</html>
