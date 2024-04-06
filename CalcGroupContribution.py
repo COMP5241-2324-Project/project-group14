@@ -1,7 +1,7 @@
 import requests, datetime
 import AnalysisBot
 
-token = "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"
+token = "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"
 headers = {'Authorization': f'token {token}'}
 
 def code_changes_stats(owner, repo, users, deadline):

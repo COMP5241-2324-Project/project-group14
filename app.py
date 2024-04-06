@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify
-import requests, datetime
+import requests
 import AnalysisBot
 import CalcGroupContribution
 from flask import request
@@ -7,7 +7,7 @@ from flask import jsonify
 import json, redis
 
 app = Flask(__name__)
-token = "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"
+token = "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"
 headers = {'Authorization': f'token {token}'}
 deadline = '2024-04-07 00:00:00'
 free_ratio = 0.3
@@ -24,15 +24,28 @@ def home():
 def getTotalInfo():
     owner = "COMP5241-2324-Project"
     repo = "project-group14"
-
-    totalCommit = redis_client.get('totalCommit').decode('utf-8')
+    # 第一次要调接口，把数据写reids。 以后先判断需不需要调接口，
+    # totalCommit = redis_client.get('totalCommit').decode('utf-8')
+    totalCommit = None
     if  totalCommit == None:
         totalCommit = get_commit_count(owner, repo)
         totalNumbers =get_contributor_count(owner, repo)
-        data ={'totalCommit':totalCommit, 'totalGroups': 20,'totalNumbers':totalNumbers}
-        redis_client.set('totalCommit', totalCommit)
-        redis_client.set('totalNumbers', totalNumbers)
-        redis_client.set('totalGroups', 20)
+
+        users = CalcGroupContribution.Getusers(owner, repo)
+        users = CalcGroupContribution.CountIssueAndComment(owner, repo, users)
+        totalIssues = 0
+        for use in users:
+            totalIssues += use['issue_num']
+        from datetime import datetime
+        today = datetime.today()
+        future_date = datetime(2024, 2, 6)
+        difference = today - future_date
+        days = difference.days
+        data ={'totalCommit':totalCommit, 'totalGroups': totalIssues,'totalNumbers':totalNumbers, 'totalDays':days}
+
+        # redis_client.set('totalCommit', totalCommit)
+        # redis_client.set('totalNumbers', totalNumbers)
+        # redis_client.set('totalGroups', 20)
         return jsonify(data)
     else:
         totalNumbers = redis_client.get('totalNumbers').decode('utf-8')
@@ -168,12 +181,12 @@ def getMemberContributor():
 def getDeadlineFighters():
     group_names = ['project-group4','project-group14']
     group_owner = 'COMP5241-2324-Project'
-    deadlineFighters = redis_client.lrange('deadline_fighters',0,-1)
-    if deadlineFighters != None:
-        data = []
-        for fighter in deadlineFighters:
-            data.append(json.loads(fighter))
-        return jsonify(data)
+    # deadlineFighters = redis_client.lrange('deadline_fighters',0,-1)
+    # if deadlineFighters != None:
+    #     data = []
+    #     for fighter in deadlineFighters:
+    #         data.append(json.loads(fighter))
+    #     return jsonify(data)
     data = []
     for group in group_names:
         users = CalcGroupContribution.Getusers(group_owner, group)
@@ -190,12 +203,12 @@ def getFreeRiders():
     group_names = ['project-group4','project-group14']
     group_owner = 'COMP5241-2324-Project'
     data = []
-    deadlineFighters = redis_client.lrange('free_riders',0,-1)
-    if deadlineFighters != None:
-        data = []
-        for fighter in deadlineFighters:
-            data.append(json.loads(fighter))
-        return jsonify(data)
+    # deadlineFighters = redis_client.lrange('free_riders',0,-1)
+    # if deadlineFighters != None:
+    #     data = []
+    #     for fighter in deadlineFighters:
+    #         data.append(json.loads(fighter))
+    #     return jsonify(data)
     for group in group_names:
         users = CalcGroupContribution.Getusers(group_owner, group)
         users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)

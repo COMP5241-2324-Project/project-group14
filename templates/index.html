@@ -60,7 +60,7 @@
                         <div class="bg-secondary rounded d-flex align-items-center justify-content-between p-4">
                             <i class="fa fa-chart-bar fa-3x text-primary"></i>
                             <div class="ms-3">
-                                <p class="mb-2">Total Groups</p>
+                                <p class="mb-2">Total Issues</p>
                                 <h6 id="totalGroups" class="mb-0">20</h6>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                             <i class="fa fa-chart-pie fa-3x text-primary"></i>
                             <div class="ms-3">
                                 <p class="mb-2">Total days</p>
-                                <h6 class="mb-0">40</h6>
+                                <h6 id="totalDays" class="mb-0">40</h6>
                             </div>
                         </div>
                     </div>
@@ -373,6 +373,7 @@
                 document.querySelector('#totalCommit').textContent = data.totalCommit;
                 document.querySelector('#totalGroups').textContent = data.totalGroups;
                 document.querySelector('#totalNumbers').textContent = data.totalNumbers;
+                document.querySelector('#totalDays').textContent = data.totalDays;
             })
             .catch(error => console.error('Error:', error));
             //  获取deadline fighters
