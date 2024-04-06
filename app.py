@@ -151,6 +151,19 @@ def getGroupMemberContributor():
         }
     return jsonify(data)
 
+
+@app.route('/getMemberContributor')
+def getMemberContributor():
+    group_name = 'project-group14'
+    group_owner = 'COMP5241-2324-Project'
+    users = CalcGroupContribution.Getusers(group_owner, group_name)
+    users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
+    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    data = []
+    for user in users:
+        data.append({'group_name':group_name ,'member':user['name'],'commits':user['commit_num'],'issues':user['issue_num'],'code_changes':user['code_change']})
+    return jsonify(data)
+
 @app.route('/getDeadlineFighters')
 def getDeadlineFighters():
     group_names = ['project-group4','project-group14']
