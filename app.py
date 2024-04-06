@@ -5,6 +5,8 @@ import CalcGroupContribution
 from flask import request
 from flask import jsonify
 import json, redis
+from datetime import datetime
+
 
 app = Flask(__name__)
 token = "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"
@@ -36,7 +38,6 @@ def getTotalInfo():
         totalIssues = 0
         for use in users:
             totalIssues += use['issue_num']
-        from datetime import datetime
         today = datetime.today()
         future_date = datetime(2024, 2, 6)
         difference = today - future_date
@@ -133,7 +134,7 @@ def getGroupCommitFrequency():
     commit_frequency = [0,0,0,0,0,0,0]
     for commit in commits:
         date = commit['commit']['author']['date']
-        date = datetime.datetime.strptime(commits[0]['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
+        date = datetime.strptime(commits[0]['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
         days = (date.month-1)*30 + date.day
         index = (days-57)//7
         print(days)
