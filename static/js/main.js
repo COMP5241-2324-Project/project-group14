@@ -115,21 +115,16 @@
     var myChart1 = new Chart(ctx1, {
         type: "bar",
         data: {
-            labels: ["group1", "group2", "group3", "group4"],
+            labels: [],
             datasets: [{
                     label: "ISSUES",
-                    data: [15, 30, 55, 65],
+                    data: [],
                     backgroundColor: "rgba(235, 22, 22, .7)"
                 },
                 {
                     label: "COMMENTS",
-                    data: [8, 35, 40, 60],
+                    data: [],
                     backgroundColor: "rgba(235, 22, 22, .5)"
-                },
-                {
-                    label: "CODE CHANGES",
-                    data: [12, 25, 45, 55],
-                    backgroundColor: "rgba(235, 22, 22, .3)"
                 }
             ]
             },
@@ -151,7 +146,6 @@
             myChart1.data.labels.push(group);
             myChart1.data.datasets[0].data.push(data.issues);
             myChart1.data.datasets[1].data.push(data.comments);
-            myChart1.data.datasets[2].data.push(data.codeChanges);
             myChart1.update();
         })
         .catch(error => console.error('Error:', error));
@@ -164,18 +158,12 @@
         data: {
             labels: ["26/02", "03/03", "10/03", "17/03", "24/03", "31/03", "07/04"],
             datasets: [
-                {
-                    label: "group 1",
-                    data: [15, 30, 55, 45, 70, 65, 85],
-                    backgroundColor: "rgba(235, 22, 22, .7)",
-                    fill: true
-                },
-                {
-                    label: "group 2",
-                    data: [99, 135, 170, 130, 190, 180, 270],
-                    backgroundColor: "rgba(235, 22, 22, .5)",
-                    fill: true
-                }
+                // {
+                //     label: "project-group14",
+                //     data: [15, 30, 55, 45, 70, 65, 85],
+                //     backgroundColor: "rgba(235, 22, 22, .7)",
+                //     fill: true
+                // }
             ]
             },
         options: {

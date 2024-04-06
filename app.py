@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 app = Flask(__name__)
-token = "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"
+token = "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"
 headers = {'Authorization': f'token {token}'}
 deadline = '2024-04-07 00:00:00'
 free_ratio = 0.3
@@ -88,12 +88,17 @@ def get_contributor_count(owner, repo):
 @app.route('/getGroupInfo')
 def getGroupInfo():
     owner = "COMP5241-2324-Project"
-    repo = "project-group14"
-    group = request.args.get('group')
-    issues_count, issues_id = get_issues_count(owner, repo)
-    comments_count = get_comments_count(owner, repo, issues_id)
-    
-    data ={'issues':issues_count,'comments':comments_count,'codeChanges':40}
+    repo = request.args.get('group')
+
+    users = CalcGroupContribution.Getusers(owner, repo)
+    users = CalcGroupContribution.CountIssueAndComment(owner, repo, users)
+    issues_count = 0
+    comments_count = 0
+    for use in users:
+        issues_count += use['issue_num']
+        comments_count += use['comment_num']
+
+    data ={'issues':issues_count,'comments':comments_count}
     return jsonify(data)
 
 def get_issues_count(owner, repo):
@@ -134,7 +139,7 @@ def getGroupCommitFrequency():
     commit_frequency = [0,0,0,0,0,0,0]
     for commit in commits:
         date = commit['commit']['author']['date']
-        date = datetime.strptime(commits[0]['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
+        date = datetime.strptime(commit['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
         days = (date.month-1)*30 + date.day
         index = (days-57)//7
         print(days)
@@ -150,7 +155,7 @@ def getGroupCommitFrequency():
     return jsonify(data)
 
 def get_commits(owner, repo):
-    url = f"https://api.github.com/repos/{owner}/{repo}/commits"
+    url = f"https://api.github.com/repos/{owner}/{repo}/commits?page=1&per_page=100"
     response = requests.get(url, headers=headers)
     commits = response.json()
     return commits
@@ -180,44 +185,42 @@ def getMemberContributor():
 
 @app.route('/getDeadlineFighters')
 def getDeadlineFighters():
-    group_names = ['project-group4','project-group14']
+    group_name = 'project-group14'
     group_owner = 'COMP5241-2324-Project'
-    # deadlineFighters = redis_client.lrange('deadline_fighters',0,-1)
-    # if deadlineFighters != None:
-    #     data = []
-    #     for fighter in deadlineFighters:
-    #         data.append(json.loads(fighter))
-    #     return jsonify(data)
+    deadlineFighters = redis_client.lrange('deadline_fighters',0,-1)
+    if deadlineFighters != None:
+        data = []
+        for fighter in deadlineFighters:
+            data.append(json.loads(fighter))
+        return jsonify(data)
     data = []
-    for group in group_names:
-        users = CalcGroupContribution.Getusers(group_owner, group)
-        users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)
-        users = CalcGroupContribution.code_changes_stats(group_owner, group, users, deadline)
-        users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
-        for user in users:
-            if user['deadline_fighter'] == True:
-                data.append({'name':group,'student':user['name']})
+    users = CalcGroupContribution.Getusers(group_owner, group_name)
+    users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
+    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+    for user in users:
+        if user['deadline_fighter'] == True:
+            data.append({'name':group_name,'student':user['name']})
     return jsonify(data)
 
 @app.route('/getFreeRiders')
 def getFreeRiders():
-    group_names = ['project-group4','project-group14']
+    group_name = 'project-group14'
     group_owner = 'COMP5241-2324-Project'
     data = []
-    # deadlineFighters = redis_client.lrange('free_riders',0,-1)
-    # if deadlineFighters != None:
-    #     data = []
-    #     for fighter in deadlineFighters:
-    #         data.append(json.loads(fighter))
-    #     return jsonify(data)
-    for group in group_names:
-        users = CalcGroupContribution.Getusers(group_owner, group)
-        users = CalcGroupContribution.CountIssueAndComment(group_owner, group, users)
-        users = CalcGroupContribution.code_changes_stats(group_owner, group, users, deadline)
-        users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
-        for user in users:
-            if user['free_rider'] == True:
-                data.append({'name':group,'student':user['name']})
+    deadlineFighters = redis_client.lrange('free_riders',0,-1)
+    if deadlineFighters != None:
+        data = []
+        for fighter in deadlineFighters:
+            data.append(json.loads(fighter))
+        return jsonify(data)
+    users = CalcGroupContribution.Getusers(group_owner, group_name)
+    users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
+    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+    for user in users:
+        if user['free_rider'] == True:
+            data.append({'name':group_name,'student':user['name']})
     return jsonify(data)
 
 
