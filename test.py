@@ -4,12 +4,8 @@ token = "github_pat_11BFM3UQY01ByPnu8SMWeg_tYqDQZvfXLxzLHxjDMo4jugbCDUQ6mdFycMOv
 headers = {'Authorization': f'token {token}'}
 
 if __name__ == "__main__":
-    from datetime import datetime
-    today = datetime.today()
-    future_date = datetime(2024, 2, 6)
-    difference = today - future_date
-    days = difference.days
-    print(days)
+    # 在名为 'myhash' 的哈希表中设置多个键值对
+    redis_client.lpush('deadline_fighters','{"name":"project-group14","student":"KatashiLiu"}','{"name":"project-group14","student":"wumujie"}')
     # deadlineFighters = redis_client.lrange('free_riders',0,-1)
     # if deadlineFighters != None:
     #     print(json.loads(deadlineFighters[0]))

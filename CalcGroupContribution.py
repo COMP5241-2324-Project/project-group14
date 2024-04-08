@@ -1,7 +1,7 @@
 import requests, datetime
 import AnalysisBot
 
-token = "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"
+token = "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"
 headers = {'Authorization': f'token {token}'}
 
 def code_changes_stats(owner, repo, users, deadline):
@@ -37,6 +37,24 @@ def code_changes_stats(owner, repo, users, deadline):
 
     return new_users
 
+def GetCommitsByuser(owner, repo, users):
+    new_users = users
+    page = 1
+    while True:
+        url_commits = "https://api.github.com/repos/{owner}/{repo}/commits?page={page}&per_page=100"
+        response_commits = requests.get(url_commits.format(owner=owner, repo=repo, page=page), headers = headers)
+        commits = response_commits.json()
+        if not commits:
+            break
+            
+        for commit in commits:
+            author = commit['author']['login']
+            for user in new_users:
+                if user['name'] == author:
+                    user['commit_num'] += 1
+        page += 1
+
+    return new_users
 
 def CountIssueAndComment(owner, repo, users):
     new_users = users

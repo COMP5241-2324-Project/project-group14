@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 app = Flask(__name__)
-token = "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"
+token = "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"
 headers = {'Authorization': f'token {token}'}
 deadline = '2024-04-07 00:00:00'
 free_ratio = 0.3
@@ -141,8 +141,10 @@ def getGroupCommitFrequency():
         date = commit['commit']['author']['date']
         date = datetime.strptime(commit['commit']['author']['date'],"%Y-%m-%dT%H:%M:%SZ")
         days = (date.month-1)*30 + date.day
+        if days <= 57:
+            commit_frequency[0] += 1
+            continue
         index = (days-57)//7
-        print(days)
         commit_frequency[index] += 1
     count = 0
     for i in range(len(commit_frequency)):
@@ -177,10 +179,11 @@ def getMemberContributor():
     group_owner = 'COMP5241-2324-Project'
     users = CalcGroupContribution.Getusers(group_owner, group_name)
     users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
-    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    users = CalcGroupContribution.GetCommitsByuser(group_owner, group_name, users)
+    hash_data = {k.decode('utf-8'): v.decode('utf-8') for k, v in redis_client.hgetall('code_changes').items()}
     data = []
     for user in users:
-        data.append({'group_name':group_name ,'member':user['name'],'commits':user['commit_num'],'issues':user['issue_num'],'code_changes':user['code_change']})
+        data.append({'group_name':group_name ,'member':user['name'],'commits':user['commit_num'],'issues':user['issue_num'],'code_changes':hash_data[user['name']]})
     return jsonify(data)
 
 @app.route('/getDeadlineFighters')
@@ -208,16 +211,18 @@ def getFreeRiders():
     group_name = 'project-group14'
     group_owner = 'COMP5241-2324-Project'
     data = []
-    deadlineFighters = redis_client.lrange('free_riders',0,-1)
-    if deadlineFighters != None:
-        data = []
-        for fighter in deadlineFighters:
-            data.append(json.loads(fighter))
-        return jsonify(data)
+    # deadlineFighters = redis_client.lrange('free_riders',0,-1)
+    # if deadlineFighters != None:
+    #     data = []
+    #     for fighter in deadlineFighters:
+    #         data.append(json.loads(fighter))
+    #     return jsonify(data)
     users = CalcGroupContribution.Getusers(group_owner, group_name)
     users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
-    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
-    users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
+    hash_data = {k.decode('utf-8'): v.decode('utf-8') for k, v in redis_client.hgetall('code_changes').items()}
+    for user in users:
+        user['code_change'] = int(hash_data[user['name']])
+    users = CalcGroupContribution.Free_rider_judge(users, ddl_ratio)
     for user in users:
         if user['free_rider'] == True:
             data.append({'name':group_name,'student':user['name']})
@@ -231,7 +236,10 @@ def getInfoFromAi():
     group_name, group_owner = data.get('group_name'), data.get('group_owner')
     users = CalcGroupContribution.Getusers(group_owner, group_name)
     users = CalcGroupContribution.CountIssueAndComment(group_owner, group_name, users)
-    users = CalcGroupContribution.code_changes_stats(group_owner, group_name, users, deadline)
+    users = CalcGroupContribution.GetCommitsByuser(group_owner, group_name, users)
+    hash_data = {k.decode('utf-8'): v.decode('utf-8') for k, v in redis_client.hgetall('code_changes').items()}    
+    for user in users:
+        user['code_change'] = int(hash_data[user['name']])
     users = CalcGroupContribution.Free_rider_judge(users, free_ratio)
     users = CalcGroupContribution.Deadline_fighter_judge(users, ddl_ratio)
     resp = AnalysisBot.chat(CalcGroupContribution.CreateUserStringForAI(users))
